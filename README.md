@@ -11,3 +11,5 @@ Normalize the code (mainly classes) of previous graphic projects for interaction
   - ParticleSystem & ParticleSystemsHandler classes
   - Shader class
   - WindowsHandler class
+
+> Check TODO for next updates
