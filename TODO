@@ -1,5 +1,6 @@
 CameraSystem class
 ErrorHandling class & integration
+Rework Shader class to get a ShadersHandler class
 Try to get no OpenGL access directly from the srcs/* files (should be UI)
 Remove using namespace std from all classes files
 Set a verbose flag for every class
