@@ -5,6 +5,7 @@
 # define CL_HPP_ENABLE_EXCEPTIONS
 # define CL_ERROR_MSG "\033]8;;https://registry.khronos.org/OpenCL/specs/opencl-cplusplus-1.2.pdf\033\\[Click Here]\033]8;;\033\\"
 # define COLOR_HEADER_CXX
+# define NO_LIMIT numeric_limits<long>::max() // No limit for the number of particles
 
 /// System includes
 # include <vector>
@@ -13,7 +14,7 @@
 /// Dependencies
 # include "Shader.hpp"
 # include "color.h"
-# include <JSON/json_config.hpp>
+# include <json/json_config.hpp>
 # include <OpenCL/opencl.hpp>
 # include <OpenCL/cl_gl.h>
 # include <GL/glx.h>
@@ -34,7 +35,7 @@ typedef struct Particle {
 // The behavior of the particles will be defined in OpenCL kernel functions.
 // This class set a OpenCL context and a OpenCL queue.
 class ParticleSystem {
-	friend class ParticleSystemUI;
+	friend class ParticleSystemsHandler;
 
 	private:
 		// OpenGL variables
@@ -98,8 +99,6 @@ class ParticleSystem {
 		}
 };
 
-# define NO_LIMIT numeric_limits<long>::max()
-
 // Example of JSON configuration file:
 // particleSystem: [{
 //     "name": "string",
@@ -119,18 +118,17 @@ typedef struct JSONParticleSystemConfig {
 } JSONParticleSystemConfig;
 typedef vector<JSONParticleSystemConfig> VJSONParticleSystemConfigs;
 
-// Particle system user interface
 // Optional class for a easier control of multiple particle systems
 // This class accept JSON configuration files:
-class ParticleSystemUI {
+class ParticleSystemsHandler {
 	private:
 		VJSONParticleSystemConfigs	particleSystems;
 		Shader						shaders;
 		long						globalParticleCount;
 
 	public:
-		ParticleSystemUI(const string &JSONConfigPath, long globalParticleCount = NO_LIMIT);
-		~ParticleSystemUI();
+		ParticleSystemsHandler(const string &JSONConfigPath, long globalParticleCount = NO_LIMIT);
+		~ParticleSystemsHandler();
 
 		/// Public functions
 

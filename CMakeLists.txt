@@ -7,11 +7,11 @@ find_package(OpenCL REQUIRED)
 
 add_executable(test
 	srcs/main.cpp
-	srcs/window.cpp
 	srcs/utils.cpp
 	includes/classes/Matrixes.cpp
 	includes/classes/Shader.cpp
 	includes/classes/ParticleSystem.cpp
+	includes/classes/WindowsHandler.cpp
 	dependencies/glad/glad.c
 )
 

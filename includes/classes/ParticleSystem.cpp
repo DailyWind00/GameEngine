@@ -273,14 +273,14 @@ void	ParticleSystem::draw() {
 
 
 
-//// ParticleSystemUI
+//// ParticleSystemsHandler
 /// Constructors & Destructors
 
 // Handle multiple particle systems defined in JSON configuration file
 // This constructor does not actually create the particle systems, it only stores their configuration
 // The particle systems are created when they are activated
 // The globalParticleCount is the maximum number of particles shared between all particle systems (default = unlimited)
-ParticleSystemUI::ParticleSystemUI(const string &configPath, long globalParticleCount) {
+ParticleSystemsHandler::ParticleSystemsHandler(const string &configPath, long globalParticleCount) {
 	printVerbose("Creating Particle System UI");
 
 	if (globalParticleCount <= 0)
@@ -325,7 +325,7 @@ ParticleSystemUI::ParticleSystemUI(const string &configPath, long globalParticle
 	printVerbose("Particle System UI created");
 }
 
-ParticleSystemUI::~ParticleSystemUI() {
+ParticleSystemsHandler::~ParticleSystemsHandler() {
 	for (auto &particleSystem : particleSystems) {
 		if (particleSystem.active)
 			delete particleSystem.particleSystem;
@@ -341,7 +341,7 @@ ParticleSystemUI::~ParticleSystemUI() {
 
 // Activate a particle system
 // Create the particle system and its shader
-void	ParticleSystemUI::activate(const string &systemName) {
+void	ParticleSystemsHandler::activate(const string &systemName) {
 	for (JSONParticleSystemConfig &particleSystem : particleSystems) {
 		if (particleSystem.name == systemName) {
 
@@ -369,7 +369,7 @@ void	ParticleSystemUI::activate(const string &systemName) {
 
 // Deactivate a particle system
 // Delete the particle system and its shader
-void	ParticleSystemUI::deactivate(const string &systemName) {
+void	ParticleSystemsHandler::deactivate(const string &systemName) {
 	for (JSONParticleSystemConfig &particleSystem : particleSystems) {
 		if (particleSystem.name == systemName) {
 
@@ -384,7 +384,7 @@ void	ParticleSystemUI::deactivate(const string &systemName) {
 }
 
 // Draw all active particle systems
-void	ParticleSystemUI::drawActivesParticleSystems() {
+void	ParticleSystemsHandler::drawActivesParticleSystems() {
 	for (const JSONParticleSystemConfig &particleSystem : particleSystems) {
 		if (particleSystem.active)
 			particleSystem.particleSystem->draw();
@@ -397,7 +397,7 @@ void	ParticleSystemUI::drawActivesParticleSystems() {
 /// Getters
 
 // Return the configuration of a particle system at a given name
-VJSONParticleSystemConfigs::const_iterator	ParticleSystemUI::operator[](const string &systemName) const {
+VJSONParticleSystemConfigs::const_iterator	ParticleSystemsHandler::operator[](const string &systemName) const {
 	auto particleSystem = particleSystems.cbegin();
 	for (uint i = 0; i < particleSystems.size(); i++) {
 		if (particleSystem->name == systemName)
@@ -409,7 +409,7 @@ VJSONParticleSystemConfigs::const_iterator	ParticleSystemUI::operator[](const st
 }
 
 // Return the configuration of a particle system at a given index
-VJSONParticleSystemConfigs::const_iterator	ParticleSystemUI::operator[](const uint &index) const {
+VJSONParticleSystemConfigs::const_iterator	ParticleSystemsHandler::operator[](const uint &index) const {
 	if (index >= particleSystems.size())
 		throw runtime_error("Index out of range");
 
@@ -421,27 +421,27 @@ VJSONParticleSystemConfigs::const_iterator	ParticleSystemUI::operator[](const ui
 }
 
 // Return the begin of the particle systems configuration
-VJSONParticleSystemConfigs::const_iterator	ParticleSystemUI::begin() const {
+VJSONParticleSystemConfigs::const_iterator	ParticleSystemsHandler::begin() const {
 	return particleSystems.cbegin();
 }
 
 // Return the configuration of the first particle system
-VJSONParticleSystemConfigs::const_iterator	ParticleSystemUI::front() const {
+VJSONParticleSystemConfigs::const_iterator	ParticleSystemsHandler::front() const {
 	return particleSystems.cbegin();
 }
 
 // Return the configuration of the last particle system
-VJSONParticleSystemConfigs::const_iterator	ParticleSystemUI::back() const {
+VJSONParticleSystemConfigs::const_iterator	ParticleSystemsHandler::back() const {
 	return particleSystems.cend() - 1;
 }
 
 // Return the end of the particle systems configuration
-VJSONParticleSystemConfigs::const_iterator	ParticleSystemUI::end() const {
+VJSONParticleSystemConfigs::const_iterator	ParticleSystemsHandler::end() const {
 	return particleSystems.cend();
 }
 
 // Return the current global particle count
-const long	&ParticleSystemUI::getGlobalParticleCount() const {
+const long	&ParticleSystemsHandler::getGlobalParticleCount() const {
 	return globalParticleCount;
 }
 /// ---
