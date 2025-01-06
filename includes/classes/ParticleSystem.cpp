@@ -6,8 +6,9 @@
 // Create a particle system with a given name, a number of particles and a list of OpenCL kernel programs
 // The kernel programs are loaded from the files in VkernelProgramPaths
 // The kernel program will begin from the "update" function
-ParticleSystem::ParticleSystem(size_t ParticleCount, const vector<string> &VkernelProgramPaths) {
-	printVerbose("Creating Particle System");
+ParticleSystem::ParticleSystem(size_t ParticleCount, const std::vector<std::string> &VkernelProgramPaths) {
+	if (VERBOSE)
+		std::cout << "Creating Particle System\n";
 
 	size_t bufferSize = ParticleCount * sizeof(Particle);
 	this->particleCount = ParticleCount;
@@ -15,13 +16,16 @@ ParticleSystem::ParticleSystem(size_t ParticleCount, const vector<string> &Vkern
 	createOpenGLBuffers(bufferSize);
 	createOpenCLContext(VkernelProgramPaths);
 
-	printVerbose("Particle System created");
+	if (VERBOSE)
+		std::cout << "Particle System created\n";
 }
 
 ParticleSystem::~ParticleSystem() {
     glDeleteBuffers(1, &VBO);
 	glDeleteVertexArrays(1, &VAO);
-	printVerbose("Particle System deleted");
+	
+	if (VERBOSE)
+		std::cout << "Particle System deleted\n";
 }
 /// ---
 
@@ -30,7 +34,7 @@ ParticleSystem::~ParticleSystem() {
 /// Private functions
 
 // Get the string representation of an OpenCL error
-const string	ParticleSystem::CLstrerrno(cl_int error) {
+const std::string	ParticleSystem::CLstrerrno(cl_int error) {
 	switch(error) {
 		// run-time and JIT compiler errors
 		case 0: return "CL_SUCCESS";
@@ -108,20 +112,20 @@ const string	ParticleSystem::CLstrerrno(cl_int error) {
 
 // Get the first OpenCL platform
 cl::Platform	ParticleSystem::getPlatform() {
-	vector<cl::Platform> platforms;
+	std::vector<cl::Platform> platforms;
 	cl::Platform::get(&platforms);
 	if (platforms.empty())
-		throw runtime_error("No OpenCL platforms found");
+		throw std::runtime_error("No OpenCL platforms found");
 
 	return platforms.front();
 }
 
 // Get the first GPU device from the platform
 cl::Device	ParticleSystem::getDevice(const cl::Platform &platform) {
-	vector<cl::Device> devices;
+	std::vector<cl::Device> devices;
 	platform.getDevices(CL_DEVICE_TYPE_GPU, &devices);
 	if (devices.empty())
-		throw runtime_error("No OpenCL devices found");
+		throw std::runtime_error("No OpenCL devices found");
 
 	return devices.front();
 }
@@ -154,17 +158,17 @@ cl::Context	ParticleSystem::createContext(const cl::Device &device, const cl::Pl
 }
 
 // Build a OpenCL program from files in VkernelProgramPaths
-cl::Program	ParticleSystem::buildProgram(const vector<string> &VkernelProgramPaths) {
+cl::Program	ParticleSystem::buildProgram(const std::vector<std::string> &VkernelProgramPaths) {
 	cl::Program::Sources sources;
 
 	// Load the kernel program from the files
-	for (const string &kernelProgramPath : VkernelProgramPaths) {
-		ifstream file(kernelProgramPath);
-		stringstream kernelSource;
-		string line;
+	for (const std::string &kernelProgramPath : VkernelProgramPaths) {
+		std::ifstream file(kernelProgramPath);
+		std::stringstream kernelSource;
+		std::string line;
 
 		if (!file.is_open())
-			throw runtime_error("Failed to open file " + kernelProgramPath + " : " + (string)strerror(errno));
+			throw std::runtime_error("Failed to open file " + kernelProgramPath + " : " + (std::string)strerror(errno));
 
 		kernelSource << file.rdbuf();
 		sources.push_back(kernelSource.str());
@@ -177,8 +181,8 @@ cl::Program	ParticleSystem::buildProgram(const vector<string> &VkernelProgramPat
 	}
 	catch (const cl::Error &e) {
 		if (e.err() == CL_BUILD_PROGRAM_FAILURE) {
-			string log = program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device);	
-			throw runtime_error("clBuildProgram (CL_BUILD_PROGRAM_FAILURE) :\n" + log);
+			std::string log = program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device);	
+			throw std::runtime_error("clBuildProgram (CL_BUILD_PROGRAM_FAILURE) :\n" + log);
 		}
 		else
 			throw e;
@@ -188,8 +192,9 @@ cl::Program	ParticleSystem::buildProgram(const vector<string> &VkernelProgramPat
 }
 
 // Create OpenCL context with OpenGL interoperability
-void	ParticleSystem::createOpenCLContext(const vector<string> &VkernelProgramPaths) {
-	printVerbose("> Creating OpenCL context -> ", false);
+void	ParticleSystem::createOpenCLContext(const std::vector<std::string> &VkernelProgramPaths) {
+	if (VERBOSE)
+		std::cout << "> Creating OpenCL context -> ";
 
 	try {
 		this->platform = getPlatform();
@@ -202,21 +207,26 @@ void	ParticleSystem::createOpenCLContext(const vector<string> &VkernelProgramPat
 		this->memObjects.push_back(particles);
 	}
 	catch (const cl::Error &e) {
-		printVerbose(BRed + "Error" + ResetColor);
-		throw runtime_error("OpenCL error : " + (string)e.what() + " (" + CLstrerrno(e.err()) + ")");
+		if (VERBOSE)
+			std::cout << BRed << "Error\n" << ResetColor;
+		throw std::runtime_error("OpenCL error : " + (std::string)e.what() + " (" + CLstrerrno(e.err()) + ")");
 	}
-	catch (const runtime_error &e) {
-		printVerbose(BRed + "Error" + ResetColor);
-		throw runtime_error("OpenCL error : " + (string)e.what());
+	catch (const std::runtime_error &e) {
+		if (VERBOSE)
+			std::cout << BRed << "Error\n" << ResetColor;
+		throw std::runtime_error("OpenCL error : " + (std::string)e.what());
 	}
 	
-	printVerbose(BGreen + "Context created" + ResetColor);
-	printVerbose("Using device: " + device.getInfo<CL_DEVICE_NAME>());
+	if (VERBOSE) {
+		std::cout << BGreen << "Context created\n" << ResetColor;
+		std::cout << "Using device: " << device.getInfo<CL_DEVICE_NAME>() << std::endl;
+	}
 }
 
 // Create OpenGL buffers for the particles
 void	ParticleSystem::createOpenGLBuffers(size_t bufferSize) {
-	printVerbose("> Creating OpenGL buffers -> ", false);
+	if (VERBOSE)
+		std::cout << "> Creating OpenGL buffers -> ";
 
     // Vertex array object
     glGenVertexArrays(1, &VAO);
@@ -240,7 +250,8 @@ void	ParticleSystem::createOpenGLBuffers(size_t bufferSize) {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
-	printVerbose(BGreen + "Buffers created" + ResetColor);
+	if (VERBOSE)
+		std::cout << BGreen << "Buffers created\n" << ResetColor;
 }
 /// ---
 
@@ -263,7 +274,7 @@ void	ParticleSystem::draw() {
 		glBindVertexArray(0);
 	}
 	catch (const cl::Error &e) {
-		throw runtime_error("OpenCL error : " + (string)e.what() + " (" + CLstrerrno(e.err()) + ")");
+		throw std::runtime_error("OpenCL error : " + (std::string)e.what() + " (" + CLstrerrno(e.err()) + ")");
 	}
 }
 /// ---
@@ -280,17 +291,18 @@ void	ParticleSystem::draw() {
 // This constructor does not actually create the particle systems, it only stores their configuration
 // The particle systems are created when they are activated
 // The globalParticleCount is the maximum number of particles shared between all particle systems (default = unlimited)
-ParticleSystemsHandler::ParticleSystemsHandler(const string &configPath, long globalParticleCount) {
-	printVerbose("Creating Particle System UI");
+ParticleSystemsHandler::ParticleSystemsHandler(const std::string &configPath, long globalParticleCount) {
+	if (VERBOSE)
+		std::cout << "Creating Particle System UI\n";
 
 	if (globalParticleCount <= 0)
-		throw runtime_error("Global particle count must be greater than 0");
+		throw std::runtime_error("Global particle count must be greater than 0");
 	this->globalParticleCount = globalParticleCount;
 
 	try {
-		ifstream file(configPath);
+		std::ifstream file(configPath);
 		if (!file.is_open())
-			throw runtime_error("Failed to open file " + configPath + " : " + (string)strerror(errno));
+			throw std::runtime_error("Failed to open file " + configPath + " : " + (std::string)strerror(errno));
 
 		json config;
 		file >> config;
@@ -309,20 +321,22 @@ ParticleSystemsHandler::ParticleSystemsHandler(const string &configPath, long gl
 			particleSystemConfig.shaderID = 0;
 
 			if (particleSystemConfig.particleCount > globalParticleCount)
-				throw runtime_error("Particle System \"" + particleSystemConfig.name + "\" has too many particles");
+				throw std::runtime_error("Particle System \"" + particleSystemConfig.name + "\" has too many particles");
 			if (particleSystemConfig.particleCount <= 0)
-				throw runtime_error("Particle System \"" + particleSystemConfig.name + "\" must have at least one particle");
+				throw std::runtime_error("Particle System \"" + particleSystemConfig.name + "\" must have at least one particle");
 
 			this->particleSystems.push_back(particleSystemConfig);
 
-			printVerbose("Particle System \"" + particleSystemConfig.name + "\" created");
+			if (VERBOSE)
+				std::cout << "Particle System \"" << particleSystemConfig.name << "\" created\n";
 		}
 	}
-	catch(const exception& e) {
-		throw runtime_error("Failed to create Particle System UI : " + (string)e.what());
+	catch(const std::exception& e) {
+		throw std::runtime_error("Failed to create Particle System UI : " + (std::string)e.what());
 	}
 
-	printVerbose("Particle System UI created");
+	if (VERBOSE)
+		std::cout << "Particle System UI created\n";
 }
 
 ParticleSystemsHandler::~ParticleSystemsHandler() {
@@ -330,7 +344,9 @@ ParticleSystemsHandler::~ParticleSystemsHandler() {
 		if (particleSystem.active)
 			delete particleSystem.particleSystem;
 	}
-	printVerbose("Particle System UI deleted");
+	
+	if (VERBOSE)
+		std::cout << "Particle System UI deleted\n";
 }
 
 /// ---
@@ -341,12 +357,12 @@ ParticleSystemsHandler::~ParticleSystemsHandler() {
 
 // Activate a particle system
 // Create the particle system and its shader
-void	ParticleSystemsHandler::activate(const string &systemName) {
+void	ParticleSystemsHandler::activate(const std::string &systemName) {
 	for (JSONParticleSystemConfig &particleSystem : particleSystems) {
 		if (particleSystem.name == systemName) {
 
 			if (particleSystem.particleCount > globalParticleCount)
-				throw runtime_error("Particle System \"" + systemName + "\" has too many particles");
+				throw std::runtime_error("Particle System \"" + systemName + "\" has too many particles");
 			globalParticleCount -= particleSystem.particleCount;
 			
 			particleSystem.particleSystem = new ParticleSystem(
@@ -364,12 +380,12 @@ void	ParticleSystemsHandler::activate(const string &systemName) {
 			return;
 		}
 	}
-	throw runtime_error("Particle System \"" + systemName + "\" not found");
+	throw std::runtime_error("Particle System \"" + systemName + "\" not found");
 }
 
 // Deactivate a particle system
 // Delete the particle system and its shader
-void	ParticleSystemsHandler::deactivate(const string &systemName) {
+void	ParticleSystemsHandler::deactivate(const std::string &systemName) {
 	for (JSONParticleSystemConfig &particleSystem : particleSystems) {
 		if (particleSystem.name == systemName) {
 
@@ -397,7 +413,7 @@ void	ParticleSystemsHandler::drawActivesParticleSystems() {
 /// Getters
 
 // Return the configuration of a particle system at a given name
-VJSONParticleSystemConfigs::const_iterator	ParticleSystemsHandler::operator[](const string &systemName) const {
+VJSONParticleSystemConfigs::const_iterator	ParticleSystemsHandler::operator[](const std::string &systemName) const {
 	auto particleSystem = particleSystems.cbegin();
 	for (uint i = 0; i < particleSystems.size(); i++) {
 		if (particleSystem->name == systemName)
@@ -411,7 +427,7 @@ VJSONParticleSystemConfigs::const_iterator	ParticleSystemsHandler::operator[](co
 // Return the configuration of a particle system at a given index
 VJSONParticleSystemConfigs::const_iterator	ParticleSystemsHandler::operator[](const uint &index) const {
 	if (index >= particleSystems.size())
-		throw runtime_error("Index out of range");
+		throw std::runtime_error("Index out of range");
 
 	auto particleSystem = particleSystems.cbegin();
 	for (uint i = 0; i < index; i++)

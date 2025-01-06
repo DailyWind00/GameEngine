@@ -17,33 +17,31 @@
 # include "color.h"
 
 /// Global variables
-using namespace std;
 extern bool VERBOSE;
-extern void printVerbose(const string &msg, bool endline = true);
 
-typedef array<float, 2> vec2;
-typedef array<float, 3> vec3;
-typedef array<float, 4> vec4;
-typedef array<float, 16> mat4;
+typedef std::array<float, 2> vec2;
+typedef std::array<float, 3> vec3;
+typedef std::array<float, 4> vec4;
+typedef std::array<float, 16> mat4;
 
 typedef struct shaderData {
-    GLuint  shaderID;
-    string  vertexPath;
-    string  fragmentpath;
-    string  shaderName;
+    GLuint		shaderID;
+    std::string	vertexPath;
+    std::string	fragmentpath;
+    std::string	shaderName;
 }   shaderData;
 
-typedef     map<GLuint, shaderData>::iterator ShaderIterator;
-typedef     pair<GLuint, shaderData> ShaderPair;
+typedef     std::map<GLuint, shaderData>::iterator ShaderIterator;
+typedef     std::pair<GLuint, shaderData> ShaderPair;
 
 class Shader {
     private:
-        map<GLuint, shaderData>     shaders;
-        vector<GLuint>              shaderIDs;
-        GLuint                      currentShaderID;
+        std::map<GLuint, shaderData>	shaders;
+        std::vector<GLuint>				shaderIDs;
+        GLuint							currentShaderID;
 
-        GLuint  make_module(const string &filepath, GLuint module_type);
-        GLuint  make_shader(const string &vertex_path, const string &fragment_path);
+        GLuint  make_module(const std::string &filepath, GLuint module_type);
+        GLuint  make_shader(const std::string &vertex_path, const std::string &fragment_path);
 
     public:
         Shader();
@@ -54,7 +52,7 @@ class Shader {
 
         void    use(GLuint shaderID);
         GLuint  recompile(GLuint shaderID);
-        GLuint  add_shader(const string &vertexPath, const string &fragmentPath, const string &shaderName);
+        GLuint  add_shader(const std::string &vertexPath, const std::string &fragmentPath, const std::string &shaderName);
         void    remove_shader(GLuint shaderID);
         GLuint	SetNextShader();
         GLuint	SetPreviousShader();
@@ -62,13 +60,13 @@ class Shader {
 
         /// Uniforms setters
 
-        void    setUniform(const GLuint &shaderID, const string &name, bool value);
-        void    setUniform(const GLuint &shaderID, const string &name, int value);
-        void    setUniform(const GLuint &shaderID, const string &name, float value);
-        void    setUniform(const GLuint &shaderID, const string &name, vec2 value);
-        void    setUniform(const GLuint &shaderID, const string &name, vec3 value);
-        void    setUniform(const GLuint &shaderID, const string &name, vec4 value);
-        void    setUniform(const GLuint &shaderID, const string &name, mat4 value);
+        void    setUniform(const GLuint &shaderID, const std::string &name, bool value);
+        void    setUniform(const GLuint &shaderID, const std::string &name, int value);
+        void    setUniform(const GLuint &shaderID, const std::string &name, float value);
+        void    setUniform(const GLuint &shaderID, const std::string &name, vec2 value);
+        void    setUniform(const GLuint &shaderID, const std::string &name, vec3 value);
+        void    setUniform(const GLuint &shaderID, const std::string &name, vec4 value);
+        void    setUniform(const GLuint &shaderID, const std::string &name, mat4 value);
 
         /// Getters
 

@@ -14,8 +14,11 @@
 # include "color.h"
 
 /// Global variables
+extern bool VERBOSE;
+
 typedef std::vector<GLFWwindow *>   VGLFWwindows;
 
+// Main class for single or multiple window handling
 class WindowsHandler {
     private:
         VGLFWwindows    windows;

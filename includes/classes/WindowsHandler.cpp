@@ -40,6 +40,10 @@ int	WindowsHandler::createWindow(int posX, int posY, int width, int height, cons
 	glViewport(0, 0, width, height);
 
 	windows.push_back(window);
+
+	if (VERBOSE)
+		std::cout << "Window " << windows.size() - 1 << " created" << std::endl;
+
 	return windows.size() - 1;
 }
 
@@ -48,6 +52,9 @@ void	WindowsHandler::useWindow(size_t index) {
 	if (index >= windows.size())
 		return;
 	glfwMakeContextCurrent(windows[index]);
+
+	if (VERBOSE)
+		std::cout << "Now using window " << index << std::endl;
 }
 
 // Destroy the window at the given index
@@ -57,6 +64,9 @@ void	WindowsHandler::destroyWindow(size_t index) {
 		return;
 	glfwDestroyWindow(windows[index]);
 	windows.erase(windows.begin() + index);
+
+	if (VERBOSE)
+		std::cout << "Window " << index << " destroyed" << std::endl;
 }
 
 // Destroy all windows
@@ -64,6 +74,9 @@ void	WindowsHandler::destroyAllWindows() {
 	for (GLFWwindow *window : windows)
 		glfwDestroyWindow(window);
 	windows.clear();
+
+	if (VERBOSE)
+		std::cout << "All windows destroyed" << std::endl;
 }
 /// ---
 

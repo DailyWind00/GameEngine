@@ -6,8 +6,6 @@
 # include <cmath>
 
 /// Global variables
-using namespace std;
-
 enum class ROTATION {
 	NONE,
 	PITCH,      // x
@@ -15,10 +13,10 @@ enum class ROTATION {
 	ROLL        // z
 };
 
-typedef array<float, 2> vec2;
-typedef array<float, 3> vec3;
-typedef array<float, 4> vec4;
-typedef array<float, 16> mat4; // using column format
+typedef std::array<float, 2> vec2;
+typedef std::array<float, 3> vec3;
+typedef std::array<float, 4> vec4;
+typedef std::array<float, 16> mat4; // using column format
 
 // Default matrix class, generate an identity matrix at creation
 class Matrix {

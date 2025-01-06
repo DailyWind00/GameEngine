@@ -5,7 +5,7 @@
 # define CL_HPP_ENABLE_EXCEPTIONS
 # define CL_ERROR_MSG "\033]8;;https://registry.khronos.org/OpenCL/specs/opencl-cplusplus-1.2.pdf\033\\[Click Here]\033]8;;\033\\"
 # define COLOR_HEADER_CXX
-# define NO_LIMIT numeric_limits<long>::max() // No limit for the number of particles
+# define NO_LIMIT std::numeric_limits<long>::max() // No limit for the number of particles
 
 /// System includes
 # include <vector>
@@ -20,7 +20,6 @@
 # include <GL/glx.h>
 
 /// Global variables
-using namespace std;
 extern bool VERBOSE;
 
 // Data structure for a particle
@@ -52,7 +51,7 @@ class ParticleSystem {
 		cl::Kernel			kernel;
 		cl::BufferGL		particles; // VRAM buffer
 		cl::CommandQueue	queue;
-		vector<cl::Memory>	memObjects;
+		std::vector<cl::Memory>	memObjects;
 
 		// Other variables
 
@@ -60,16 +59,16 @@ class ParticleSystem {
 
 		/// Private functions
 
-		const string	CLstrerrno(cl_int error);
+		const std::string	CLstrerrno(cl_int error);
 		cl::Platform	getPlatform();
 		cl::Device		getDevice(const cl::Platform &platform);
 		cl::Context		createContext(const cl::Device &device, const cl::Platform &platform);
-		cl::Program		buildProgram(const vector<string> &VkernelProgramPaths);
+		cl::Program		buildProgram(const std::vector<std::string> &VkernelProgramPaths);
 		void			createOpenGLBuffers(size_t bufferSize);
-		void			createOpenCLContext(const vector<string> &VkernelProgramPaths);
+		void			createOpenCLContext(const std::vector<std::string> &VkernelProgramPaths);
 
 	public:
-		ParticleSystem(size_t ParticleCount, const vector<string> &VkernelProgramPaths);
+		ParticleSystem(size_t ParticleCount, const std::vector<std::string> &VkernelProgramPaths);
 		~ParticleSystem();
 
 		/// Public functions
@@ -94,7 +93,7 @@ class ParticleSystem {
 				(void)(int[]){0, (kernel.setArg(index++, args), 0)...};
 			}
 			catch (const cl::Error &e) {
-				throw runtime_error("OpenCL error : " + (string)e.what() + " (" + CLstrerrno(e.err()) + ")");
+				throw std::runtime_error("OpenCL error : " + (std::string)e.what() + " (" + CLstrerrno(e.err()) + ")");
 			}
 		}
 };
@@ -107,16 +106,16 @@ class ParticleSystem {
 //     "kernel": ["kernelPath", ...]
 // }, ...]
 typedef struct JSONParticleSystemConfig {
-	string				name;
-	long				particleCount;
-	array<string, 2>	shaderPaths;
-	vector<string>		kernelPaths;
+	std::string					name;
+	long						particleCount;
+	std::array<std::string, 2>	shaderPaths;
+	std::vector<std::string>	kernelPaths;
 
 	bool				active;
 	ParticleSystem	   *particleSystem = nullptr;
 	GLuint				shaderID = 0;
 } JSONParticleSystemConfig;
-typedef vector<JSONParticleSystemConfig> VJSONParticleSystemConfigs;
+typedef std::vector<JSONParticleSystemConfig> VJSONParticleSystemConfigs;
 
 // Optional class for a easier control of multiple particle systems
 // This class accept JSON configuration files:
@@ -127,25 +126,25 @@ class ParticleSystemsHandler {
 		long						globalParticleCount;
 
 	public:
-		ParticleSystemsHandler(const string &JSONConfigPath, long globalParticleCount = NO_LIMIT);
+		ParticleSystemsHandler(const std::string &JSONConfigPath, long globalParticleCount = NO_LIMIT);
 		~ParticleSystemsHandler();
 
 		/// Public functions
 
-		void	activate(const string &systemName);
-		void	deactivate(const string &systemName);
+		void	activate(const std::string &systemName);
+		void	deactivate(const std::string &systemName);
 		void	drawActivesParticleSystems();
 
 		// Set the uniform to the particle system shader
 		template <typename argument>
-		void setShaderUniform(const string &systemName, const string &uniformName, const argument &args) {
+		void setShaderUniform(const std::string &systemName, const std::string &uniformName, const argument &args) {
 			auto particleSystem = operator[](systemName);
 
 			if (particleSystem == particleSystems.end())
-				throw runtime_error("Particle System \"" + systemName + "\" not found");
+				throw std::runtime_error("Particle System \"" + systemName + "\" not found");
 
 			if (!particleSystem->active)
-				throw runtime_error("Particle System \"" + systemName + "\" is inactive");
+				throw std::runtime_error("Particle System \"" + systemName + "\" is inactive");
 
 			shaders.setUniform(particleSystem->shaderID, uniformName, args);
 		};
@@ -155,21 +154,21 @@ class ParticleSystemsHandler {
 		//  - Particle = struct { cl_float position[3], cl_float velocity[3], cl_float life }
 		// Use OpenCL types
 		template <typename... arguments>
-		void setKernelArgs(const string &systemName, arguments... args) {
+		void setKernelArgs(const std::string &systemName, arguments... args) {
 			auto particleSystem = operator[](systemName);
 
 			if (particleSystem == particleSystems.end())
-				throw runtime_error("Particle System \"" + systemName + "\" not found");
+				throw std::runtime_error("Particle System \"" + systemName + "\" not found");
 
 			if (!particleSystem->active)
-				throw runtime_error("Particle System \"" + systemName + "\" is inactive");
+				throw std::runtime_error("Particle System \"" + systemName + "\" is inactive");
 
 			particleSystem->particleSystem->setKernelArgs(args...);
 		};
 
 		/// Getters
 
-		VJSONParticleSystemConfigs::const_iterator  operator[](const string &systemName) const;
+		VJSONParticleSystemConfigs::const_iterator  operator[](const std::string &systemName) const;
 		VJSONParticleSystemConfigs::const_iterator  operator[](const uint &index) const;
 		VJSONParticleSystemConfigs::const_iterator  begin() const;
 		VJSONParticleSystemConfigs::const_iterator  front() const;
