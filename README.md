@@ -12,4 +12,4 @@ Normalize the code (mainly classes) of previous graphic projects for interaction
   - Shader class
   - WindowsHandler class
 
-> Check [project](https://github.com/users/DailyWind00/projects/3) for next updates
+> Check [project](https://github.com/users/DailyWind00/projects/3) for next updates / contribute
