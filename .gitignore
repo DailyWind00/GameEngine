@@ -1,5 +1,7 @@
 .vscode/
 build/
+dependencies/
+test/
 GameEngine
 *.log
 *.logs

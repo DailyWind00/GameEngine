@@ -10,7 +10,7 @@ namespace GE {
 		if (!glfwInit())
 			throw std::runtime_error("Failed to initialize GLFW");
 
-		if (logger) logger->trace("> GLFW initialized");
+		if (logger) logger->trace("GLFW initialized");
 
 		// TODO: make the OpenGL context in a separate class, need to have an integrated framework before that
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, static_cast<int>(GLversion));
@@ -28,7 +28,7 @@ namespace GE {
 			glfwDestroyWindow(window);
 			throw std::runtime_error("Failed to initialize GLAD");
 		}
-		if (logger) logger->trace("> GLAD initialized");
+		if (logger) logger->trace("GLAD initialized");
 
 		glfwSetWindowPos(window, posX, posY);
 

@@ -18,7 +18,6 @@ add_executable(GameEngine
 	# Dependencies
 	dependencies/glad/glad.c
 	dependencies/glfw/libglfw3.a
-	dependencies/glm/libglm.a
 	dependencies/stb_image/stb_def.c
 )
 

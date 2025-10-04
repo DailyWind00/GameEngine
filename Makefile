@@ -3,15 +3,18 @@ NAME = GameEngine
 
 all: release
 
-release:
+release: dependencies
 	@cmake -B build -DCMAKE_BUILD_TYPE=Release
 	@make -C build -j $(MAKEFLAGS)
 	@mv build/$(NAME) .
 
-debug:
+debug: dependencies
 	@cmake -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=g++
 	@make -C build -j $(MAKEFLAGS)
 	@mv build/$(NAME) .
+
+dependencies:
+	@./install_dependencies.sh
 
 clean:
 	@rm -rf build
@@ -20,10 +23,9 @@ clean:
 fclean: clean
 	@rm -f $(NAME)
 
-# Need to create script to re-download dependencies
-# wipe: fclean
-# 	@rm -rf dependencies
+wipe: fclean
+	@rm -rf dependencies
 
 re: fclean all
 
-.PHONY: all release debug clean fclean re
+.PHONY: all release debug dependencies clean fclean wipe re
