@@ -1,23 +1,8 @@
 #pragma once
 
-/// Defines
-# define COLOR_HEADER_CXX
+#include "GameEngine.hpp"
 
-/// System includes
-# include <iostream>
-# include <fstream>
-# include <string.h>
+using namespace GE;
+using Logger = Core::Logger;
 
-/// Custom includes
-# include "WindowsHandler.hpp"
-# include "color.h"
-
-/// Global variables
-using namespace std;
-
-extern bool VERBOSE;
-
-/// Functions
-
-// utils.cpp
-void	printVerbose(const string &message, bool newline = true);
+// Do game related stuff here i'm not your mom

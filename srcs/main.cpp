@@ -1,27 +1,21 @@
 #include "config.hpp"
 
-int main(int argc, char **argv) {
-	(void)argc; (void)argv;
+void renderLoop() {
+	// Rendering code goes here
+}
 
-	try {
-		// Create a window
-		WindowsHandler windowsHandler;
-		windowsHandler.createWindow(200, 200, 800, 600, "Window");
+int main() {
 
-		// Main loop
-		while (!glfwWindowShouldClose(*windowsHandler.front())) {
-			// // Rendering
-			// Rendering(*windowsHandler[windowIndex]);
+	Logger& logger = Logger::getInstance();
 
-			// Swap buffers
-			glfwSwapBuffers(*windowsHandler.front());
+	logger.enableConsoleOutput(true);
+	logger.setLogLevel(Logger::LogLevel::TRACE);
+	logger.info("Game Engine started");
 
-			// Poll events
-			glfwPollEvents();
-		}
-	}
-	catch(const exception& e) {
-		cerr << BRed <<  "Critical Error : " << e.what() << ResetColor <<'\n';
-		exit(EXIT_FAILURE);
-	}
+	GE::Window window(100, 100, 800, 600, "Game Engine Window", 4.2f, &logger);
+
+	window.mainLoop(renderLoop);
+	logger.info("Game Engine stopped");
+
+	return 0;
 }
