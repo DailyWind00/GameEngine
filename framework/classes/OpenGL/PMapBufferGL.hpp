@@ -19,18 +19,11 @@ namespace GE::OpenGL {
 	/// @note The buffer must be created with GL_MAP_FLUSH_EXPLICIT_BIT in usage if you want to use the flush() method.
 	/// @note As this class may be frequently used, it is designed to be as lightweight as possible and have no logging integrated.
 	class PMapBufferGL {
-		private:
-			GLuint	_id;
-			GLenum	_type;
-			GLenum	_usage;
-			size_t	_capacity;
-			void *	_data;
-
 		public:
 			PMapBufferGL(GLenum type, size_t capacity, GLenum usage = 0);
 			~PMapBufferGL();
 
-			/// Public functions
+			/// Public functionsf
 			void    bind();
 			void    unbind();
 			size_t  resize(size_t newCapacity, bool keepData = true);
@@ -42,5 +35,13 @@ namespace GE::OpenGL {
 			const GLuint &	getID() const;
 			const GLenum &	getType() const;
 			const size_t &	getCapacity() const;
+
+		private:
+			GLuint	_id;
+			GLenum	_type;
+			GLenum	_usage;
+			size_t	_capacity;
+			void *	_data;
+
 	};
 } // namespace GE::OpenGL

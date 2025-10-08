@@ -11,12 +11,16 @@ add_executable(GameEngine
 
 	# Framework Classes
 	framework/core/Logger.cpp
+
 	framework/classes/Objects/ParticleSystem.cpp
 	framework/classes/Objects/SkyBox.cpp
+	framework/classes/Objects/Camera.cpp
+
 	framework/classes/OpenGL/Shader.cpp
 	framework/classes/OpenGL/Window.cpp
 	framework/classes/OpenGL/BufferGL.cpp
 	framework/classes/OpenGL/PMapBufferGL.cpp
+
 	framework/classes/Utils/PriorityMutex.cpp
 
 	# Dependencies

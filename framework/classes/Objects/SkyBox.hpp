@@ -28,12 +28,6 @@ namespace GE::Objects {
 	 * @note Texture are optional and can be replaced by a shader-only skybox.
 	 */
 	class	SkyBox {
-		private:
-			GLuint	VAO;
-			GLuint	VBO;
-			GLuint	textureID = 0;
-			Core::Logger	*logger = nullptr;
-
 		public:
 			SkyBox(const std::vector<std::string> &path = {}, Core::Logger *logger = nullptr);
 			~SkyBox();
@@ -41,6 +35,12 @@ namespace GE::Objects {
 			/// Public functions
 
 			void	draw();
+
+		private:
+			GLuint	VAO;
+			GLuint	VBO;
+			GLuint	textureID = 0;
+			Core::Logger	*logger = nullptr;
 	};
 }
 

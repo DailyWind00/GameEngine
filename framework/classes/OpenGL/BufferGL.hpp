@@ -14,12 +14,6 @@ namespace GE::OpenGL {
 	///
 	/// @note As this class may be frequently used, it is designed to be as lightweight as possible and have no logging integrated.
 	class BufferGL {
-		private:
-			GLuint	_id;
-			GLenum	_type;
-			GLenum	_usage;
-			size_t	_capacity;
-
 		public:
 			BufferGL(GLenum type, GLenum usage, size_t size = 0, const void *data = nullptr);
 			~BufferGL();
@@ -37,5 +31,11 @@ namespace GE::OpenGL {
 			const GLuint &	getID() const;
 			const GLenum &	getType() const;
 			const size_t &	getCapacity() const;
+
+		private:
+			GLuint	_id;
+			GLenum	_type;
+			GLenum	_usage;
+			size_t	_capacity;
 	};
 } // namespace GE::OpenGL
