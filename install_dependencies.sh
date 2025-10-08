@@ -132,7 +132,7 @@ fi
 # ------------------------------
 # stb_image
 # ------------------------------
-if [ ! -d "stb" ]; then
+if [ ! -d "stb_image" ]; then
 	cd temp
     echo "[*] Fetching stb..."
     git clone --depth=1 https://github.com/nothings/stb.git
