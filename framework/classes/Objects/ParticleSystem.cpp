@@ -2,270 +2,270 @@
 
 namespace GE::Objects {
 
-# pragma region Constructors & Destructors
+	# pragma region Constructors & Destructors
 
-// Create a particle system with a given name, a number of particles and a list of OpenCL kernel programs
-// The kernel programs are loaded from the files in VkernelProgramPaths
-// The kernel program will begin from the "update" function
-ParticleSystem::ParticleSystem(size_t ParticleCount, const std::vector<std::string> &VkernelProgramPaths, Core::Logger* logger) : logger(logger) {
-	if (logger) logger->info("Creating particle system with " + std::to_string(ParticleCount) + " particles");
+	// Create a particle system with a given name, a number of particles and a list of OpenCL kernel programs
+	// The kernel programs are loaded from the files in VkernelProgramPaths
+	// The kernel program will begin from the "update" function
+	ParticleSystem::ParticleSystem(size_t ParticleCount, const std::vector<std::string> &VkernelProgramPaths, Core::Logger* logger) : logger(logger) {
+		if (logger) logger->info("Creating particle system with " + std::to_string(ParticleCount) + " particles");
 
-	size_t bufferSize = ParticleCount * sizeof(Particle);
-	this->particleCount = ParticleCount;
+		size_t bufferSize = ParticleCount * sizeof(Particle);
+		this->particleCount = ParticleCount;
 
-	createOpenGLBuffers(bufferSize);
-	createOpenCLContext(VkernelProgramPaths);
+		createOpenGLBuffers(bufferSize);
+		createOpenCLContext(VkernelProgramPaths);
 
-	if (logger) logger->info("Particle system created");
-}
-
-ParticleSystem::~ParticleSystem() {
-    glDeleteBuffers(1, &VBO);
-	glDeleteVertexArrays(1, &VAO);
-	
-	if (logger) logger->info("Particle system destroyed");
-}
-
-# pragma endregion
-
-# pragma region Private functions
-
-// Get the string representation of an OpenCL error
-const std::string	ParticleSystem::CLstrerrno(cl_int error) {
-	switch(error) {
-		// run-time and JIT compiler errors
-		case 0: return "CL_SUCCESS";
-		case -1: return "CL_DEVICE_NOT_FOUND";
-		case -2: return "CL_DEVICE_NOT_AVAILABLE";
-		case -3: return "CL_COMPILER_NOT_AVAILABLE";
-		case -4: return "CL_MEM_OBJECT_ALLOCATION_FAILURE";
-		case -5: return "CL_OUT_OF_RESOURCES";
-		case -6: return "CL_OUT_OF_HOST_MEMORY";
-		case -7: return "CL_PROFILING_INFO_NOT_AVAILABLE";
-		case -8: return "CL_MEM_COPY_OVERLAP";
-		case -9: return "CL_IMAGE_FORMAT_MISMATCH";
-		case -10: return "CL_IMAGE_FORMAT_NOT_SUPPORTED";
-		case -11: return "CL_BUILD_PROGRAM_FAILURE";
-		case -12: return "CL_MAP_FAILURE";
-		case -13: return "CL_MISALIGNED_SUB_BUFFER_OFFSET";
-		case -14: return "CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST";
-		case -15: return "CL_COMPILE_PROGRAM_FAILURE";
-		case -16: return "CL_LINKER_NOT_AVAILABLE";
-		case -17: return "CL_LINK_PROGRAM_FAILURE";
-		case -18: return "CL_DEVICE_PARTITION_FAILED";
-		case -19: return "CL_KERNEL_ARG_INFO_NOT_AVAILABLE";
-
-		// compile-time errors
-		case -30: return "CL_INVALID_VALUE";
-		case -31: return "CL_INVALID_DEVICE_TYPE";
-		case -32: return "CL_INVALID_PLATFORM";
-		case -33: return "CL_INVALID_DEVICE";
-		case -34: return "CL_INVALID_CONTEXT";
-		case -35: return "CL_INVALID_QUEUE_PROPERTIES";
-		case -36: return "CL_INVALID_COMMAND_QUEUE";
-		case -37: return "CL_INVALID_HOST_PTR";
-		case -38: return "CL_INVALID_MEM_OBJECT";
-		case -39: return "CL_INVALID_IMAGE_FORMAT_DESCRIPTOR";
-		case -40: return "CL_INVALID_IMAGE_SIZE";
-		case -41: return "CL_INVALID_SAMPLER";
-		case -42: return "CL_INVALID_BINARY";
-		case -43: return "CL_INVALID_BUILD_OPTIONS";
-		case -44: return "CL_INVALID_PROGRAM";
-		case -45: return "CL_INVALID_PROGRAM_EXECUTABLE";
-		case -46: return "CL_INVALID_KERNEL_NAME";
-		case -47: return "CL_INVALID_KERNEL_DEFINITION";
-		case -48: return "CL_INVALID_KERNEL";
-		case -49: return "CL_INVALID_ARG_INDEX";
-		case -50: return "CL_INVALID_ARG_VALUE";
-		case -51: return "CL_INVALID_ARG_SIZE";
-		case -52: return "CL_INVALID_KERNEL_ARGS";
-		case -53: return "CL_INVALID_WORK_DIMENSION";
-		case -54: return "CL_INVALID_WORK_GROUP_SIZE";
-		case -55: return "CL_INVALID_WORK_ITEM_SIZE";
-		case -56: return "CL_INVALID_GLOBAL_OFFSET";
-		case -57: return "CL_INVALID_EVENT_WAIT_LIST";
-		case -58: return "CL_INVALID_EVENT";
-		case -59: return "CL_INVALID_OPERATION";
-		case -60: return "CL_INVALID_GL_OBJECT";
-		case -61: return "CL_INVALID_BUFFER_SIZE";
-		case -62: return "CL_INVALID_MIP_LEVEL";
-		case -63: return "CL_INVALID_GLOBAL_WORK_SIZE";
-		case -64: return "CL_INVALID_PROPERTY";
-		case -65: return "CL_INVALID_IMAGE_DESCRIPTOR";
-		case -66: return "CL_INVALID_COMPILER_OPTIONS";
-		case -67: return "CL_INVALID_LINKER_OPTIONS";
-		case -68: return "CL_INVALID_DEVICE_PARTITION_COUNT";
-
-		// extension errors
-		case -1000: return "CL_INVALID_GL_SHAREGROUP_REFERENCE_KHR";
-		case -1001: return "CL_PLATFORM_NOT_FOUND_KHR";
-		case -1002: return "CL_INVALID_D3D10_DEVICE_KHR";
-		case -1003: return "CL_INVALID_D3D10_RESOURCE_KHR";
-		case -1004: return "CL_D3D10_RESOURCE_ALREADY_ACQUIRED_KHR";
-		case -1005: return "CL_D3D10_RESOURCE_NOT_ACQUIRED_KHR";
-		default: return "Unknown OpenCL error";
-	}
-}
-
-// Get the first OpenCL platform
-cl::Platform	ParticleSystem::getPlatform() {
-	std::vector<cl::Platform> platforms;
-	cl::Platform::get(&platforms);
-	if (platforms.empty())
-		throw std::runtime_error("No OpenCL platforms found");
-
-	return platforms.front();
-}
-
-// Get the first GPU device from the platform
-cl::Device	ParticleSystem::getDevice(const cl::Platform &platform) {
-	std::vector<cl::Device> devices;
-	platform.getDevices(CL_DEVICE_TYPE_GPU, &devices);
-	if (devices.empty())
-		throw std::runtime_error("No OpenCL devices found");
-
-	return devices.front();
-}
-
-// Create an OpenCL context with OpenGL interoperability based on the operating system
-cl::Context	ParticleSystem::createContext(const cl::Device &device, const cl::Platform &platform) {
-	#if defined(__linux__) || defined(__unix__)
-		cl_context_properties properties[] = { // Interoperability with OpenGL (Linux)
-			CL_GL_CONTEXT_KHR, (cl_context_properties)glXGetCurrentContext(),
-			CL_GLX_DISPLAY_KHR, (cl_context_properties)glXGetCurrentDisplay(),
-			CL_CONTEXT_PLATFORM, (cl_context_properties)(platform)(),
-			0
-		};
-	#elif __APPLE__
-		cl_context_properties properties[] = { // Interoperability with OpenGL (MacOS)
-			CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE, (cl_context_properties)CGLGetShareGroup(CGLGetCurrentContext()),
-			0
-		};
-	#elif _WIN32
-		cl_context_properties properties[] = { // Interoperability with OpenGL (Windows)
-			CL_GL_CONTEXT_KHR, (cl_context_properties)wglGetCurrentContext(),
-			CL_WGL_HDC_KHR, (cl_context_properties)wglGetCurrentDC(),
-			CL_CONTEXT_PLATFORM, (cl_context_properties)(platform)(),
-			0
-		};
-	#endif
-
-	cl::Context context(device, properties);
-	return context;
-}
-
-// Build a OpenCL program from files in VkernelProgramPaths
-cl::Program	ParticleSystem::buildProgram(const std::vector<std::string> &VkernelProgramPaths) {
-	cl::Program::Sources sources;
-
-	// Load the kernel program from the files
-	for (const std::string &kernelProgramPath : VkernelProgramPaths) {
-		std::ifstream file(kernelProgramPath);
-		std::stringstream kernelSource;
-		std::string line;
-
-		if (!file.is_open())
-			throw std::runtime_error("Failed to open file " + kernelProgramPath + " : " + (std::string)strerror(errno));
-
-		kernelSource << file.rdbuf();
-		sources.push_back(kernelSource.str());
-		file.close();
+		if (logger) logger->info("Particle system created");
 	}
 
-    cl::Program program(context, sources);
-	try {
-		program.build({device});
+	ParticleSystem::~ParticleSystem() {
+		glDeleteBuffers(1, &VBO);
+		glDeleteVertexArrays(1, &VAO);
+		
+		if (logger) logger->info("Particle system destroyed");
 	}
-	catch (const cl::Error &e) {
-		if (e.err() == CL_BUILD_PROGRAM_FAILURE) {
-			std::string log = program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device);	
-			throw std::runtime_error("clBuildProgram (CL_BUILD_PROGRAM_FAILURE) :\n" + log);
+
+	# pragma endregion
+
+	# pragma region Private functions
+
+	// Get the string representation of an OpenCL error
+	const std::string	ParticleSystem::CLstrerrno(cl_int error) {
+		switch(error) {
+			// run-time and JIT compiler errors
+			case 0: return "CL_SUCCESS";
+			case -1: return "CL_DEVICE_NOT_FOUND";
+			case -2: return "CL_DEVICE_NOT_AVAILABLE";
+			case -3: return "CL_COMPILER_NOT_AVAILABLE";
+			case -4: return "CL_MEM_OBJECT_ALLOCATION_FAILURE";
+			case -5: return "CL_OUT_OF_RESOURCES";
+			case -6: return "CL_OUT_OF_HOST_MEMORY";
+			case -7: return "CL_PROFILING_INFO_NOT_AVAILABLE";
+			case -8: return "CL_MEM_COPY_OVERLAP";
+			case -9: return "CL_IMAGE_FORMAT_MISMATCH";
+			case -10: return "CL_IMAGE_FORMAT_NOT_SUPPORTED";
+			case -11: return "CL_BUILD_PROGRAM_FAILURE";
+			case -12: return "CL_MAP_FAILURE";
+			case -13: return "CL_MISALIGNED_SUB_BUFFER_OFFSET";
+			case -14: return "CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST";
+			case -15: return "CL_COMPILE_PROGRAM_FAILURE";
+			case -16: return "CL_LINKER_NOT_AVAILABLE";
+			case -17: return "CL_LINK_PROGRAM_FAILURE";
+			case -18: return "CL_DEVICE_PARTITION_FAILED";
+			case -19: return "CL_KERNEL_ARG_INFO_NOT_AVAILABLE";
+
+			// compile-time errors
+			case -30: return "CL_INVALID_VALUE";
+			case -31: return "CL_INVALID_DEVICE_TYPE";
+			case -32: return "CL_INVALID_PLATFORM";
+			case -33: return "CL_INVALID_DEVICE";
+			case -34: return "CL_INVALID_CONTEXT";
+			case -35: return "CL_INVALID_QUEUE_PROPERTIES";
+			case -36: return "CL_INVALID_COMMAND_QUEUE";
+			case -37: return "CL_INVALID_HOST_PTR";
+			case -38: return "CL_INVALID_MEM_OBJECT";
+			case -39: return "CL_INVALID_IMAGE_FORMAT_DESCRIPTOR";
+			case -40: return "CL_INVALID_IMAGE_SIZE";
+			case -41: return "CL_INVALID_SAMPLER";
+			case -42: return "CL_INVALID_BINARY";
+			case -43: return "CL_INVALID_BUILD_OPTIONS";
+			case -44: return "CL_INVALID_PROGRAM";
+			case -45: return "CL_INVALID_PROGRAM_EXECUTABLE";
+			case -46: return "CL_INVALID_KERNEL_NAME";
+			case -47: return "CL_INVALID_KERNEL_DEFINITION";
+			case -48: return "CL_INVALID_KERNEL";
+			case -49: return "CL_INVALID_ARG_INDEX";
+			case -50: return "CL_INVALID_ARG_VALUE";
+			case -51: return "CL_INVALID_ARG_SIZE";
+			case -52: return "CL_INVALID_KERNEL_ARGS";
+			case -53: return "CL_INVALID_WORK_DIMENSION";
+			case -54: return "CL_INVALID_WORK_GROUP_SIZE";
+			case -55: return "CL_INVALID_WORK_ITEM_SIZE";
+			case -56: return "CL_INVALID_GLOBAL_OFFSET";
+			case -57: return "CL_INVALID_EVENT_WAIT_LIST";
+			case -58: return "CL_INVALID_EVENT";
+			case -59: return "CL_INVALID_OPERATION";
+			case -60: return "CL_INVALID_GL_OBJECT";
+			case -61: return "CL_INVALID_BUFFER_SIZE";
+			case -62: return "CL_INVALID_MIP_LEVEL";
+			case -63: return "CL_INVALID_GLOBAL_WORK_SIZE";
+			case -64: return "CL_INVALID_PROPERTY";
+			case -65: return "CL_INVALID_IMAGE_DESCRIPTOR";
+			case -66: return "CL_INVALID_COMPILER_OPTIONS";
+			case -67: return "CL_INVALID_LINKER_OPTIONS";
+			case -68: return "CL_INVALID_DEVICE_PARTITION_COUNT";
+
+			// extension errors
+			case -1000: return "CL_INVALID_GL_SHAREGROUP_REFERENCE_KHR";
+			case -1001: return "CL_PLATFORM_NOT_FOUND_KHR";
+			case -1002: return "CL_INVALID_D3D10_DEVICE_KHR";
+			case -1003: return "CL_INVALID_D3D10_RESOURCE_KHR";
+			case -1004: return "CL_D3D10_RESOURCE_ALREADY_ACQUIRED_KHR";
+			case -1005: return "CL_D3D10_RESOURCE_NOT_ACQUIRED_KHR";
+			default: return "Unknown OpenCL error";
 		}
-		else
-			throw e;
 	}
 
-	return program;
-}
+	// Get the first OpenCL platform
+	cl::Platform	ParticleSystem::getPlatform() {
+		std::vector<cl::Platform> platforms;
+		cl::Platform::get(&platforms);
+		if (platforms.empty())
+			throw std::runtime_error("No OpenCL platforms found");
 
-// Create OpenCL context with OpenGL interoperability
-void	ParticleSystem::createOpenCLContext(const std::vector<std::string> &VkernelProgramPaths) {
-	if (logger) logger->trace("Creating OpenCL context");
-
-	try {
-		this->platform = getPlatform();
-		this->device = getDevice(platform);
-		this->context = createContext(device, platform);
-		this->program = buildProgram(VkernelProgramPaths);
-		this->kernel = cl::Kernel(program, "update");
-		this->particles = cl::BufferGL(context, CL_MEM_READ_WRITE, VBO); // Interoperability with OpenGL
-		this->queue = cl::CommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE); // Remove profiling when project is finished
-		this->memObjects.push_back(particles);
+		return platforms.front();
 	}
-	catch (const cl::Error &e) {
-		throw std::runtime_error("OpenCL error : " + (std::string)e.what() + " (" + CLstrerrno(e.err()) + ")");
+
+	// Get the first GPU device from the platform
+	cl::Device	ParticleSystem::getDevice(const cl::Platform &platform) {
+		std::vector<cl::Device> devices;
+		platform.getDevices(CL_DEVICE_TYPE_GPU, &devices);
+		if (devices.empty())
+			throw std::runtime_error("No OpenCL devices found");
+
+		return devices.front();
 	}
-	catch (const std::runtime_error &e) {
-		throw std::runtime_error("OpenCL error : " + (std::string)e.what());
+
+	// Create an OpenCL context with OpenGL interoperability based on the operating system
+	cl::Context	ParticleSystem::createContext(const cl::Device &device, const cl::Platform &platform) {
+		#if defined(__linux__) || defined(__unix__)
+			cl_context_properties properties[] = { // Interoperability with OpenGL (Linux)
+				CL_GL_CONTEXT_KHR, (cl_context_properties)glXGetCurrentContext(),
+				CL_GLX_DISPLAY_KHR, (cl_context_properties)glXGetCurrentDisplay(),
+				CL_CONTEXT_PLATFORM, (cl_context_properties)(platform)(),
+				0
+			};
+		#elif __APPLE__
+			cl_context_properties properties[] = { // Interoperability with OpenGL (MacOS)
+				CL_CONTEXT_PROPERTY_USE_CGL_SHAREGROUP_APPLE, (cl_context_properties)CGLGetShareGroup(CGLGetCurrentContext()),
+				0
+			};
+		#elif _WIN32
+			cl_context_properties properties[] = { // Interoperability with OpenGL (Windows)
+				CL_GL_CONTEXT_KHR, (cl_context_properties)wglGetCurrentContext(),
+				CL_WGL_HDC_KHR, (cl_context_properties)wglGetCurrentDC(),
+				CL_CONTEXT_PLATFORM, (cl_context_properties)(platform)(),
+				0
+			};
+		#endif
+
+		cl::Context context(device, properties);
+		return context;
 	}
-	
-	if (logger) {
-		logger->trace("OpenCL context created");
-		logger->info("Particle system using OpenCL device: " + device.getInfo<CL_DEVICE_NAME>());
+
+	// Build a OpenCL program from files in VkernelProgramPaths
+	cl::Program	ParticleSystem::buildProgram(const std::vector<std::string> &VkernelProgramPaths) {
+		cl::Program::Sources sources;
+
+		// Load the kernel program from the files
+		for (const std::string &kernelProgramPath : VkernelProgramPaths) {
+			std::ifstream file(kernelProgramPath);
+			std::stringstream kernelSource;
+			std::string line;
+
+			if (!file.is_open())
+				throw std::runtime_error("Failed to open file " + kernelProgramPath + " : " + (std::string)strerror(errno));
+
+			kernelSource << file.rdbuf();
+			sources.push_back(kernelSource.str());
+			file.close();
+		}
+
+		cl::Program program(context, sources);
+		try {
+			program.build({device});
+		}
+		catch (const cl::Error &e) {
+			if (e.err() == CL_BUILD_PROGRAM_FAILURE) {
+				std::string log = program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device);	
+				throw std::runtime_error("clBuildProgram (CL_BUILD_PROGRAM_FAILURE) :\n" + log);
+			}
+			else
+				throw e;
+		}
+
+		return program;
 	}
-}
 
-// Create OpenGL buffers for the particles
-void	ParticleSystem::createOpenGLBuffers(size_t bufferSize) {
-	if (logger) logger->trace("Creating OpenGL buffers");
+	// Create OpenCL context with OpenGL interoperability
+	void	ParticleSystem::createOpenCLContext(const std::vector<std::string> &VkernelProgramPaths) {
+		if (logger) logger->trace("Creating OpenCL context");
 
-    // Vertex array object
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
+		try {
+			this->platform = getPlatform();
+			this->device = getDevice(platform);
+			this->context = createContext(device, platform);
+			this->program = buildProgram(VkernelProgramPaths);
+			this->kernel = cl::Kernel(program, "update");
+			this->particles = cl::BufferGL(context, CL_MEM_READ_WRITE, VBO); // Interoperability with OpenGL
+			this->queue = cl::CommandQueue(context, device, CL_QUEUE_PROFILING_ENABLE); // Remove profiling when project is finished
+			this->memObjects.push_back(particles);
+		}
+		catch (const cl::Error &e) {
+			throw std::runtime_error("OpenCL error : " + (std::string)e.what() + " (" + CLstrerrno(e.err()) + ")");
+		}
+		catch (const std::runtime_error &e) {
+			throw std::runtime_error("OpenCL error : " + (std::string)e.what());
+		}
+		
+		if (logger) {
+			logger->trace("OpenCL context created");
+			logger->info("Particle system using OpenCL device: " + device.getInfo<CL_DEVICE_NAME>());
+		}
+	}
 
-	// Vertex buffer object
-	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, bufferSize * sizeof(Particle), nullptr, GL_DYNAMIC_DRAW); // Allocate memory (but don't fill it)
+	// Create OpenGL buffers for the particles
+	void	ParticleSystem::createOpenGLBuffers(size_t bufferSize) {
+		if (logger) logger->trace("Creating OpenGL buffers");
 
-    // Enable vertex attributes and set up their layout
-    glEnableVertexAttribArray(0); // Position
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)offsetof(Particle, position));
-
-    glEnableVertexAttribArray(1); // Velocity
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)offsetof(Particle, velocity));
-
-    glEnableVertexAttribArray(2); // Life
-    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)offsetof(Particle, life));
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-
-	if (logger) logger->trace("OpenGL buffers created");
-}
-
-# pragma endregion
-
-# pragma region Public functions
-
-// Draw the particles
-void	ParticleSystem::draw() {
-	try {
-		/// Execute the kernel
-		queue.enqueueAcquireGLObjects(&memObjects);
-		queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(particleCount), cl::NullRange);
-		queue.enqueueReleaseGLObjects(&memObjects);
-		queue.finish();
-
-		/// Draw the particles
+		// Vertex array object
+		glGenVertexArrays(1, &VAO);
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_POINTS, 0, particleCount);
+
+		// Vertex buffer object
+		glGenBuffers(1, &VBO);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferData(GL_ARRAY_BUFFER, bufferSize * sizeof(Particle), nullptr, GL_DYNAMIC_DRAW); // Allocate memory (but don't fill it)
+
+		// Enable vertex attributes and set up their layout
+		glEnableVertexAttribArray(0); // Position
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)offsetof(Particle, position));
+
+		glEnableVertexAttribArray(1); // Velocity
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)offsetof(Particle, velocity));
+
+		glEnableVertexAttribArray(2); // Life
+		glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)offsetof(Particle, life));
+
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
+
+		if (logger) logger->trace("OpenGL buffers created");
 	}
-	catch (const cl::Error &e) {
-		throw std::runtime_error("OpenCL error : " + (std::string)e.what() + " (" + CLstrerrno(e.err()) + ")");
+
+	# pragma endregion
+
+	# pragma region Public functions
+
+	// Draw the particles
+	void	ParticleSystem::draw() {
+		try {
+			/// Execute the kernel
+			queue.enqueueAcquireGLObjects(&memObjects);
+			queue.enqueueNDRangeKernel(kernel, cl::NullRange, cl::NDRange(particleCount), cl::NullRange);
+			queue.enqueueReleaseGLObjects(&memObjects);
+			queue.finish();
+
+			/// Draw the particles
+			glBindVertexArray(VAO);
+			glDrawArrays(GL_POINTS, 0, particleCount);
+			glBindVertexArray(0);
+		}
+		catch (const cl::Error &e) {
+			throw std::runtime_error("OpenCL error : " + (std::string)e.what() + " (" + CLstrerrno(e.err()) + ")");
+		}
 	}
-}
 
 # pragma endregion
 
