@@ -14,6 +14,7 @@
 /// Objects includes
 /// These includes provide access to various drawable game objects and entities.
 # include "classes/Objects/ParticleSystem.hpp"
+# include "classes/Objects/SkyBox.hpp"
 
 
 /// OpenGL includes

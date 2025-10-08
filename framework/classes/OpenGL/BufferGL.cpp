@@ -1,4 +1,4 @@
-# include "BufferGL.hpp"
+#include "BufferGL.hpp"
 
 namespace GE::OpenGL {
 
