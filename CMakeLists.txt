@@ -11,9 +11,12 @@ add_executable(GameEngine
 
 	# Framework Classes
 	framework/core/Logger.cpp
-	framework/classes/ParticleSystem.cpp
-	framework/classes/Shader.cpp
-	framework/classes/Window.cpp
+	framework/classes/Objects/ParticleSystem.cpp
+	framework/classes/OpenGL/Shader.cpp
+	framework/classes/OpenGL/Window.cpp
+	framework/classes/OpenGL/BufferGL.cpp
+	framework/classes/OpenGL/PMapBufferGL.cpp
+	framework/classes/Utils/PriorityMutex.cpp
 
 	# Dependencies
 	dependencies/glad/glad.c

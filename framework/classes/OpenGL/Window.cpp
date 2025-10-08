@@ -1,6 +1,6 @@
 #include "Window.hpp"
 
-namespace GE {
+namespace GE::OpenGL {
 
 	# pragma region Constructors & Destructors
 
@@ -107,4 +107,4 @@ namespace GE {
 
 	# pragma endregion
 
-} // namespace GE
+} // namespace GE::OpenGL

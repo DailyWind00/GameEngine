@@ -3,11 +3,12 @@
 // System includes
 # include <type_traits>
 
-// Namespace
 namespace GE::Core {
 	/**
 	 * @brief The Singleton class template provides a way to create a singleton instance of a class.
+	 * 
 	 * It ensures that only one instance of the class exists throughout the application.
+	 * 
 	 * The instance is created on first access and is destroyed when the application exits.
 	 * 
 	 * @tparam T The type of the singleton class.
@@ -33,4 +34,4 @@ namespace GE::Core {
 			Singleton& operator=(Singleton&&) = delete;
 			~Singleton() = default;
 	};
-}
+} // namespace GE::Core

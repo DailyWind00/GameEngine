@@ -1,4 +1,4 @@
-# pragma once
+#pragma once
 
 /// Defines
 # define FAILURE -1
@@ -14,9 +14,11 @@
 # include <glad/glad.h>
 # include <glfw/glfw3.h>
 
-namespace GE {
+namespace GE::OpenGL {
 	/// @brief The Window class is a wrapper around a GLFW window.
+	///
 	/// It handles the creation, destruction and main loop of the window.
+	///
 	/// It also provides some useful getters and setters.
 	class Window {
 		public:
@@ -80,4 +82,4 @@ namespace GE {
 
 			void	updateFrameRate();
 	};
-} // namespace GE
+} // namespace GE::OpenGL

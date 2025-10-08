@@ -10,9 +10,9 @@
 # include <unordered_map>
 
 namespace GE::Core {
-
 	/**
 	 * @brief The Logger class provides a simple logging mechanism for the application.
+	 * 
 	 * The logger can output messages to both the console and a file, and it supports different log levels:
 	 * TRACE, DEBUG, INFO, WARNING, ERROR, and FATAL.
 	 * 

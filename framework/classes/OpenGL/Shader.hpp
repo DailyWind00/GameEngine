@@ -15,9 +15,11 @@
 # include <glm/glm.hpp>
 # include <glm/gtc/type_ptr.hpp>
 
-namespace GE {
+namespace GE::OpenGL {
 	/// @brief The Shader class is a wrapper around an OpenGL shader program.
+	///
 	/// It handles the creation, destruction and recompilation of the shader program.
+	///
 	/// It also provides methods to set uniform variables in the shader program.
 	class Shader {
 		public:
@@ -61,4 +63,4 @@ namespace GE {
 			GLuint	make_module(const std::string &filepath, GLuint module_type);
 			GLuint	make_shader();
 	};
-} // namespace GE
+} // namespace GE::OpenGL

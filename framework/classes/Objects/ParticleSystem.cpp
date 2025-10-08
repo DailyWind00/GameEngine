@@ -1,6 +1,6 @@
 #include "ParticleSystem.hpp"
 
-namespace GE {
+namespace GE::Objects {
 
 # pragma region Constructors & Destructors
 
@@ -269,4 +269,4 @@ void	ParticleSystem::draw() {
 
 # pragma endregion
 
-} // namespace GE
+} // namespace GE::Objects

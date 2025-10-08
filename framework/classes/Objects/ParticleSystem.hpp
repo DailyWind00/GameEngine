@@ -20,7 +20,7 @@
 # include <glad/glad.h>
 # include <GL/glx.h>
 
-namespace GE {
+namespace GE::Objects {
 	// Data structure for a particle
 	// Stored in 7 floats
 	typedef struct Particle {
@@ -95,4 +95,4 @@ namespace GE {
 			void			createOpenGLBuffers(size_t bufferSize);
 			void			createOpenCLContext(const std::vector<std::string> &VkernelProgramPaths);
 	};
-} // namespace GE
+} // namespace GE::Objects
