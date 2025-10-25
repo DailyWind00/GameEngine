@@ -22,6 +22,7 @@ add_executable(GameEngine
 	framework/classes/OpenGL/PMapBufferGL.cpp
 
 	framework/classes/Utils/PriorityMutex.cpp
+	framework/classes/Utils/NoiseGenerator.cpp
 
 	# Dependencies
 	dependencies/glad/glad.c

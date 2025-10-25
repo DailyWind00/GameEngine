@@ -29,3 +29,4 @@
 /// Utils includes
 /// These includes provide access to various utility functions and classes.
 # include "Utils/PriorityMutex.hpp"
+# include "Utils/NoiseGenerator.hpp"
