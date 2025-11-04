@@ -105,6 +105,11 @@ namespace GE::OpenGL {
 		glfwSetWindowTitle(window, title.c_str());
 	}
 
+	// Set the should close flag of the window
+	void	Window::setShouldClose(bool value) {
+		glfwSetWindowShouldClose(window, value);
+	}
+
 	# pragma endregion
 
 } // namespace GE::OpenGL

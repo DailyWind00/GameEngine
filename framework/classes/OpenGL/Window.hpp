@@ -69,6 +69,7 @@ namespace GE::OpenGL {
 			/// Setters
 
 			void	setTitle(const std::string &title);
+			void	setShouldClose(bool value);
 
 		private:
 			Core::Logger	*logger = nullptr;
